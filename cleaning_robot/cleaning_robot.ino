@@ -1,6 +1,6 @@
 #define Trig 12
 #define Echo 13
-#define SwitchPin A0
+#define SwitchPin A0  
 #define FanPin 10      // MOSFET
 #define VibrationPin A2
 #define LedPin A1
@@ -10,7 +10,7 @@ const int in22 = 3;  // IN2
 const int in23 = 4;  // IN3
 const int in24 = 5;  // IN4
 
-int pragVibratie = 1;
+int thresholdVib = 1;
 
 unsigned long ledOnUntil = 0; // pentru timer LED
 
@@ -32,20 +32,20 @@ void setup()
   digitalWrite(FanPin, LOW);
   digitalWrite(LedPin, LOW);
 
-  Serial.println("Aștept comutatorul ON pentru start...");
+  Serial.println("Asteapta start...");
 } 
 
 void loop() 
 {
   if (digitalRead(SwitchPin) == LOW)  // robot ON
   {
-    digitalWrite(FanPin, HIGH); // MOSFET -> ventilator ON
+    digitalWrite(FanPin, HIGH);
 
     int vibratie = analogRead(VibrationPin);
     Serial.print("Vibratie: ");
     Serial.println(vibratie);
 
-    if (vibratie > pragVibratie) {
+    if (vibratie > thresholdVib) {
       ledOnUntil = millis() + 1500;
       Serial.println("LED aprins.");
     }
@@ -57,8 +57,10 @@ void loop()
     }
 
     // senzor ultrasonic
-    digitalWrite(Trig, LOW); delayMicroseconds(2);
-    digitalWrite(Trig, HIGH); delayMicroseconds(10);
+    digitalWrite(Trig, LOW);
+    delayMicroseconds(2);
+    digitalWrite(Trig, HIGH);
+    delayMicroseconds(10);
     digitalWrite(Trig, LOW);
     unsigned int impulseTime = pulseIn(Echo, HIGH);
     unsigned int distance_sm = impulseTime / 58;
