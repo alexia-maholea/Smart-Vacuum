@@ -1,105 +1,116 @@
 #define Trig 12
 #define Echo 13
 #define SwitchPin A0  
-#define FanPin 10      // MOSFET
+#define FanPin 10         // MOSFET
 #define VibrationPin A2
 #define LedPin A1
 
-const int in21 = 2;  // IN1
-const int in22 = 3;  // IN2
-const int in23 = 4;  // IN3
-const int in24 = 5;  // IN4
+const int in1 = 2;         // IN1 – dir motor A
+const int in2 = 3;         // IN2 – dir motor A
+const int in3 = 4;         // IN3 – dir motor B
+const int in4 = 7;         // IN4 – dir motor B
+const int enA = 5;         // ENA – viteza motor A (PWM)
+const int enB = 6;         // ENB – viteza motor B (PWM)
 
 int thresholdVib = 1;
-
-unsigned long ledOnUntil = 0; // pentru timer LED
+unsigned long ledOnUntil = 0;  // pentru led
 
 void setup() 
-{  
-  Serial.begin(9600);
-
-  pinMode(Trig, OUTPUT);
+{
+    Serial.begin(9600);
+   pinMode(Trig, OUTPUT);
   pinMode(Echo, INPUT);
   pinMode(SwitchPin, INPUT_PULLUP);
   pinMode(FanPin, OUTPUT);
   pinMode(LedPin, OUTPUT);
-
-  pinMode(in21, OUTPUT);
-  pinMode(in22, OUTPUT);
-  pinMode(in23, OUTPUT);
-  pinMode(in24, OUTPUT);
-
+  
+  pinMode(in1, OUTPUT);
+  pinMode(in2, OUTPUT);
+  pinMode(in3, OUTPUT);
+  pinMode(in4, OUTPUT);
+  pinMode(enA, OUTPUT);
+  pinMode(enB, OUTPUT);
+  
   digitalWrite(FanPin, LOW);
   digitalWrite(LedPin, LOW);
-
-  Serial.println("Asteapta start...");
-} 
+  
+  Serial.println("Wait for start...");
+}
 
 void loop() 
 {
   if (digitalRead(SwitchPin) == LOW)  // robot ON
   {
     digitalWrite(FanPin, HIGH);
-
-    int vibratie = analogRead(VibrationPin);
-    Serial.print("Vibratie: ");
-    Serial.println(vibratie);
-
+    
+    // Detectare vibrații
+    int vibration = analogRead(VibrationPin);
+    Serial.print("Vibration felt: ");
+    Serial.println(vibration);
+    
     if (vibratie > thresholdVib) {
       ledOnUntil = millis() + 1500;
       Serial.println("LED aprins.");
     }
-
+    
     if (millis() < ledOnUntil) {
       digitalWrite(LedPin, HIGH);
     } else {
       digitalWrite(LedPin, LOW);
     }
-
-    // senzor ultrasonic
+    
+    // masurare distanta
     digitalWrite(Trig, LOW);
     delayMicroseconds(2);
     digitalWrite(Trig, HIGH);
     delayMicroseconds(10);
     digitalWrite(Trig, LOW);
     unsigned int impulseTime = pulseIn(Echo, HIGH);
-    unsigned int distance_sm = impulseTime / 58;
-
-    Serial.print("Distanta: ");
-    Serial.print(distance_sm);
+    unsigned int distance_cm = impulseTime / 58;
+    
+    Serial.print("Distance: ");
+    Serial.print(distance_cm);
     Serial.println(" cm");
-
-    if (distance_sm > 25) 
-    {     
-      Serial.println("Merg inainte");
-      digitalWrite(in21, LOW);
-      digitalWrite(in22, HIGH);
-      digitalWrite(in23, HIGH);
-      digitalWrite(in24, LOW);
-    }  
-    else 
-    {   
-      Serial.println("Obstacol! Intoarcere...");
-      digitalWrite(in21, HIGH);
-      digitalWrite(in22, LOW);
-      digitalWrite(in23, HIGH);
-      digitalWrite(in24, LOW);
-      delay(1100); 
-    }   
-  }
+    
+    if (distance_cm > 20) 
+    {
+          Serial.println("Go forward!");
+      digitalWrite(in1, HIGH);  // motor A
+      digitalWrite(in2, LOW);   // motor A
+      digitalWrite(in3, HIGH);  // motor B
+      digitalWrite(in4, LOW);   // motor B
+      analogWrite(enA, 10);  // viteza motor A
+      analogWrite(enB, 10);  // viteza motor B
+    }
+      else 
+    {
+         Serial.println("Something is blocking the way! Turning back...");
+      digitalWrite(in1, HIGH);  // motor A forwards
+      digitalWrite(in2, LOW);   // motor A forwards  
+      digitalWrite(in3, LOW);   // motor B backwards
+      digitalWrite(in4, HIGH);  // motor B backwards
+      analogWrite(enA, 150);    //  rotation speed
+      analogWrite(enB, 150);    //  rotation speed
+      delay(1100);
+     }
+     
+    }
   else
   {
     // robot OFF
     digitalWrite(FanPin, LOW);
     digitalWrite(LedPin, LOW);
-
-    digitalWrite(in21, LOW);
-    digitalWrite(in22, LOW);
-    digitalWrite(in23, LOW);
-    digitalWrite(in24, LOW);
-
+    
+    analogWrite(enA, 0);
+    analogWrite(enB, 0);
+    
+    digitalWrite(in1, LOW);
+    digitalWrite(in2, LOW);
+    digitalWrite(in3, LOW);
+    digitalWrite(in4, LOW);
+    
     Serial.println("Switch OFF");
   }
-
-  delay(100); 
+  
+  delay(100);
 }
