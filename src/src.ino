@@ -17,8 +17,8 @@ unsigned long ledOnUntil = 0;  // pentru led
 
 void setup() 
 {
-    Serial.begin(9600);
-   pinMode(Trig, OUTPUT);
+  Serial.begin(9600);
+  pinMode(Trig, OUTPUT);
   pinMode(Echo, INPUT);
   pinMode(SwitchPin, INPUT_PULLUP);
   pinMode(FanPin, OUTPUT);
@@ -50,7 +50,7 @@ void loop()
     
     if (vibratie > thresholdVib) {
       ledOnUntil = millis() + 1500;
-      Serial.println("LED aprins.");
+      Serial.println("LED on.");
     }
     
     if (millis() < ledOnUntil) {
@@ -74,7 +74,7 @@ void loop()
     
     if (distance_cm > 20) 
     {
-          Serial.println("Go forward!");
+      Serial.println("Go forward!");
       digitalWrite(in1, HIGH);  // motor A
       digitalWrite(in2, LOW);   // motor A
       digitalWrite(in3, HIGH);  // motor B
@@ -84,7 +84,7 @@ void loop()
     }
       else 
     {
-         Serial.println("Something is blocking the way! Turning back...");
+      Serial.println("Something is blocking the way! Turning back...");
       digitalWrite(in1, HIGH);  // motor A forwards
       digitalWrite(in2, LOW);   // motor A forwards  
       digitalWrite(in3, LOW);   // motor B backwards
